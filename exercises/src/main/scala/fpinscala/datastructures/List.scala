@@ -120,9 +120,9 @@ object List {
     }
 
   def flatten[A](as: List[List[A]]): List[A] =
-  foldLeft(as, Nil: List[A]) {
-    (resultList, a) => appendWithFold(resultList, a)
-  }
+    foldLeft(as, Nil: List[A]) {
+      (resultList, a) => appendWithFold(resultList, a)
+    }
 
   def mapPlus1(as: List[Int]): List[Int] = foldRight2(as, Nil: List[Int]) {
     (x, result) => Cons(x + 1, result)
@@ -142,4 +142,41 @@ object List {
       case false => result
     }
   }
+
+  def flatMap[A, B](l: List[A])(f: A => List[B]): List[B] = foldRight2(l, Nil: List[B]) {
+    (x, result) => appendWithFold(f(x), result)
+  }
+
+  def filterUsingFlatMap[A](l: List[A])(f: A => Boolean): List[A] =
+    flatMap(l)(x => f(x) match {
+      case true => List(x)
+      case false => Nil
+    })
+
+  def zipPlus(l: List[Int], r: List[Int]): List[Int] = {
+    (l, r) match {
+      case (Cons(hl, zl), Cons(hr, zr)) => Cons(hl + hr, zipPlus(zl, zr))
+      case _ => Nil
+    }
+  }
+
+  def zipWith[A, B](l: List[A], r: List[A], f: (A, A) => B): List[B] = {
+    def internalZip(li: List[A], ri: List[A], result: List[B]): List[B] = {
+      (li, ri) match {
+        case (Cons(hli, zli), Cons(hri, zri)) => internalZip(zli, zri, Cons(f(hli, hri), result))
+        case _ => result
+      }
+    }
+
+    List.reverse(internalZip(l, r, Nil))
+  }
+
+  def hasSubsequence[A](l: List[A], sub: List[A]): Boolean =
+    if (List.length(l) < List.length(sub)) false
+    else
+      foldLeft(zipWith[A, Boolean](l, sub, _ == _), true)(_ && _) match {
+        case true => true
+        case false => hasSubsequence(List.tail(l), sub)
+      }
+
 }
