@@ -20,7 +20,7 @@ sealed trait Option[+A] {
   }
 
   def orElse[B>:A](ob: => Option[B]): Option[B] = this match {
-    case s :Some => s
+    case s :Some[B] => s
     case None => ob
   }
 
