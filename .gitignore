@@ -6,3 +6,6 @@ project/boot
 .history
 project.vim
 *.old
+*worksheet.sc
+.idea_modules/
+.idea/
